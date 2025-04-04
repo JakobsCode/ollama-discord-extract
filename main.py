@@ -34,12 +34,15 @@ with open(csv_datei, mode='r', encoding='utf-8') as file:
         if raw_embed_json:  # Wenn der JSON-String nicht leer ist
             raw_embed_json = '{"'+raw_embed_json.replace("\'","")[1:-1]
             json_dict = json.loads(raw_embed_json)
-            # if 'thumbnail' in json_dict:
-            #     continue
             if not "footer" in json_dict:
                 continue
-            # if json_dict.get('type') == 'link' or json_dict.get('type') == 'article':
-            #     continue
+
+            del json_dict['image']
+            del json_dict['footer']['icon_url']
+            del json_dict['footer']['proxy_icon_url']
+            del json_dict['color']
+            del json_dict['type']
+            
             response = chat(
             messages=[
                                 {
@@ -47,7 +50,7 @@ with open(csv_datei, mode='r', encoding='utf-8') as file:
                 'content': 
                     'Deine Aufgabe ist es jetzt, aus dem Discord Embend als JSON dastellt, die benötigten Informationen auszulesen und zurückzugeben. Es stellt eine Benachrichtung für einen Amazon Deal da, also den Einkauf eines Produktes bei einem Einzelhändler und dann den Verkauf mit Gewinn dieses Produktes bei Amazon.'
                     'asin stellt die ASIN des Produktes da, das auch im Text vorkommt bzw in dem Amazon Link hier: https://www.amazon.<Marktplatz Domain>/dp/<ASIN> so zum Beispiel ist der "amazon_link" wo das Produkt gekauft werden soll https://www.amazon.de/dp/B09D3OLKPM und die asin somit B09D3OLKPM.'
-                    '"buy_link" stellt den Link (also AUSSCHLIEßLICH ein HTTPS LINK) da, wo das Produkt gekauft werden soll. "ROI" stell den Return on Invest da der auch im Text vorkommt. "profit" ist der Gewinn, der auch im Text vorkommt. "EK" ist der Einkaufspreis, der auch im Text vorkommt. "VK" ist der Verkaufspreis, der auch im Text vorkommt. "title" ist der Titel des Produktes, das auch im Text vorkommt.',
+                    '"buy_link" stellt den Link (also AUSSCHLIEßLICH ein HTTPS LINK) da, wo das Produkt gekauft werden soll, welcher oft im "url" Key im JSON vorkommt. "ROI" stell den Return on Invest da der auch im Text vorkommt. "profit" ist der Gewinn, der auch im Text vorkommt. "EK" ist der Einkaufspreis, der auch im Text vorkommt. "VK" ist der Verkaufspreis, der auch im Text vorkommt. "title" ist der Titel des Produktes, das auch im Text vorkommt.',
                 },
                 {
                 'role': 'user',
