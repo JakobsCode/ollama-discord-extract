@@ -37,12 +37,23 @@ with open(csv_datei, mode='r', encoding='utf-8') as file:
             if not "footer" in json_dict:
                 continue
 
-            del json_dict['image']
-            del json_dict['footer']['icon_url']
-            del json_dict['footer']['proxy_icon_url']
-            del json_dict['color']
-            del json_dict['type']
-            
+            # Überprüfe, ob der Schlüssel existiert, bevor du ihn entfernst
+            if 'image' in json_dict:
+                del json_dict['image']
+
+            if 'footer' in json_dict:
+                if 'icon_url' in json_dict['footer']:
+                    del json_dict['footer']['icon_url']
+                if 'proxy_icon_url' in json_dict['footer']:
+                    del json_dict['footer']['proxy_icon_url']
+
+            if 'color' in json_dict:
+                del json_dict['color']
+
+            if 'type' in json_dict:
+                del json_dict['type']
+
+
             response = chat(
             messages=[
                                 {
@@ -58,10 +69,17 @@ with open(csv_datei, mode='r', encoding='utf-8') as file:
                 }
             ],
             model='deepseek-r1:14b',
+
             format=AmazonProduct.model_json_schema(),
             )
+            
+            try: 
+                product = AmazonProduct.model_validate_json(response.message.content)
+            except Exception as e:
+                print(f"Error: {e}")
+                print(response.message.content)
+                continue
 
-            product = AmazonProduct.model_validate_json(response.message.content)
             print(product)
 
             r.json().set(f"discord:csv:1:{message_id}", '$', {"embed": json_dict, "result": product.model_dump()})
