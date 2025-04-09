@@ -1,6 +1,6 @@
 from ollama import chat
 from pydantic import BaseModel
-
+import time
 import csv
 import json
 import redis
@@ -15,7 +15,8 @@ class AmazonProduct(BaseModel):
   VK: float
   title: str
 
-r = redis.Redis(host='localhost', port=6379, db=2, decode_responses=True)
+print("Starting...")
+r = redis.Redis(host='localhost', port=6379, db=3, decode_responses=True)
 
 # Pfad zur CSV-Datei
 csv_datei = 'discord_v1.csv'
@@ -32,6 +33,8 @@ with open(csv_datei, mode='r', encoding='utf-8') as file:
             print(f"Key already exists for message_id: {message_id}")
             continue
         if raw_embed_json:  # Wenn der JSON-String nicht leer ist
+            start = time.time()
+            
             raw_embed_json = '{"'+raw_embed_json.replace("\'","")[1:-1]
             json_dict = json.loads(raw_embed_json)
             if not "footer" in json_dict:
@@ -68,8 +71,10 @@ with open(csv_datei, mode='r', encoding='utf-8') as file:
                 'content': json.dumps(json_dict),
                 }
             ],
-            model='deepseek-r1:14b',
-
+            #model='deepseek-r1:7b',
+            #model='deepseek-r1:1.5b',
+            #model='deepseek-r1:14b',
+            model='deepseek-r1:32b',
             format=AmazonProduct.model_json_schema(),
             )
             
@@ -80,6 +85,9 @@ with open(csv_datei, mode='r', encoding='utf-8') as file:
                 print(response.message.content)
                 continue
 
-            print(product)
+            end = time.time()
+            dauer = end - start
+            print(f"{product.asin} - {dauer:.2f} Sekunden")
 
             r.json().set(f"discord:csv:1:{message_id}", '$', {"embed": json_dict, "result": product.model_dump()})
+
