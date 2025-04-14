@@ -5,7 +5,7 @@ import json
 r = redis.StrictRedis(host='localhost', port=6379, db=2, decode_responses=True)
 
 # Holen Sie sich alle Schlüssel in der Datenbank
-keys = r.keys('*')
+keys = r.keys('discord:csv:*')
 
 count = 0
 
@@ -16,8 +16,6 @@ with open('redis_dump.json', 'w', encoding='utf-8') as file:
     for key in keys:
         json_data = r.json().get(key)
         redis_list.append(json_data)
-        if json_data['result']['vk_asin'] and json_data['result']['vk_asin'] != "":
-            count += 1
 
     json.dump(redis_list, file, ensure_ascii=False, indent=4)
 

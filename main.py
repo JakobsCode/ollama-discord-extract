@@ -21,7 +21,7 @@ print("Starting...")
 r = redis.Redis(host='localhost', port=6379, db=2, decode_responses=True)
 
 # Pfad zur CSV-Datei
-csv_datei = 'dd_deals2.csv'
+csv_datei = 'data-1744652322935.csv'
 
 finished = False
 
